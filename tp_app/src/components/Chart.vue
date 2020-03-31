@@ -127,6 +127,9 @@ var options2 = {
 };
 export default {
   props: {
+    which_esps: Array
+    ,
+    k: Number,
     partsdata: {
       type: Array
     }
@@ -142,14 +145,11 @@ export default {
       items: [],
       options: options,
       options2: options2,
-      which_esps: [
-        "B4:E6:2D:96:78:D9",
-        "80:7D:3A:FD:E8:E8",
-        "30:AE:A4:86:CA:7C",
-        "80:7D:3A:FD:DD:08"
-      ],
       listeData: []
     };
+  },
+  mounted(){
+ 
   },
   methods: {
     start: function() {
@@ -159,10 +159,10 @@ export default {
           color: "#" + ((Math.random() * 0xffffff) | 0).toString(16)
         }
       }); */
-
-      for (var i = 0; i < this.which_esps.length; i++) {
-        this.process_esp(this.which_esps, i);
-      }
+       for (var i = 0; i < this.which_esps.length; i++) {
+          this.process_esp(this.which_esps, i);
+        } 
+     
     },
 
     process_esp(which_esps, i) {

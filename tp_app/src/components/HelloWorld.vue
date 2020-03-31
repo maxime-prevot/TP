@@ -2,10 +2,14 @@
   <div class="hello">
     <h1>{{ msg }}</h1>
     <div id="app">
-      <Chart />
+       <label for="MAC">Adresse MAC:</label>
+      <input type="text" id="MAC" name="MAC"><br><br>
+      <md-button class="md-accent md-raised" type="button" v-on:click="ajoutMAC()">Ajouter MAC en tant qu'invité</md-button>
+      <Chart  :k="componentKey" :which_esps= "which_esps"/>
     </div>
-  <!-- <md-input v-model="name"></md-input>
-  <md-button class="md-primary md-raised" v-on:click="addFloat(name)">Add to fleet</md-button> -->
+    <!-- <md-input v-model="name"></md-input>
+    <md-button class="md-primary md-raised" v-on:click="addFloat(name)">Add to fleet</md-button>-->
+      
     <h1>LED states</h1>
     <md-table>
       <md-table-row slot="md-table-row">
@@ -14,15 +18,15 @@
       </md-table-row>
       <md-table-row>
         <md-table-cell md-label="Name">B4:E6:2D:96:78:D9</md-table-cell>
-      
+
         <md-table-cell md-label="Actions">
           <md-button class="md-primary md-raised" v-on:click="switchState('B4:E6:2D:96:78:D9')">PING</md-button>
         </md-table-cell>
       </md-table-row>
       <md-table-row>
-        <md-table-cell md-label="Name">80:7D:3A:FD:E8:E8</md-table-cell>
+        <md-table-cell md-label="Name">80:7D:3A:FD:DD:08</md-table-cell>
         <md-table-cell md-label="Actions">
-          <md-button class="md-primary md-raised" v-on:click="switchState('80:7D:3A:FD:E8:E8')">PING</md-button>
+          <md-button class="md-primary md-raised" v-on:click="switchState('80:7D:3A:FD:DD:08')">PING</md-button>
         </md-table-cell>
       </md-table-row>
       <md-table-row>
@@ -32,9 +36,9 @@
         </md-table-cell>
       </md-table-row>
       <md-table-row>
-        <md-table-cell md-label="Name">80:7D:3A:FD:DD:08</md-table-cell>
+        <md-table-cell md-label="Name">{{ which_esps[3] }}</md-table-cell>
         <md-table-cell md-label="Actions">
-          <md-button class="md-primary md-raised" v-on:click="switchState('80:7D:3A:FD:DD:08')">PING</md-button>
+          <md-button class="md-primary md-raised" v-on:click="switchState(which_esps[3])">PING</md-button>
         </md-table-cell>
       </md-table-row>
     </md-table>
@@ -54,11 +58,12 @@ export default {
       node_url: "http://localhost:3000",
       which_esps: [
         "B4:E6:2D:96:78:D9",
-        "80:7D:3A:FD:E8:E8",
+        "80:7D:3A:FD:DD:08",
         "30:AE:A4:86:CA:7C",
-        "80:7D:3A:FD:DD:08"
+        ""
       ],
-      name: ''
+      name: "",
+      componentKey: 0
     };
   },
   components: {
@@ -70,16 +75,23 @@ export default {
   mounted() {},
 
   methods: {
+    ajoutMAC() {
+      var adMac = document.getElementById("MAC");
+      console.log("MAC: " + adMac.value);
+      this.which_esps[3] = adMac.value;
+      console.log(this.which_esps);
+     // this.start();
+      this.forceRerender();
+    },
+     forceRerender() {
+      this.componentKey += 1;  
+    },
     start: function() {
-      /*    var chart = this.$refs.highcharts.chart;
-      chart.credits.update({
-        style: {
-          color: "#" + ((Math.random() * 0xffffff) | 0).toString(16)
-        }
-      }); */
-
       for (var i = 0; i < this.which_esps.length; i++) {
-        this.getStates("/esp/led", [], this.which_esps[i]);
+        this.getStates("/esp/light", [], this.which_esps[i]);
+      }
+      for (var j = 0; j < this.which_esps.length; j++) {
+        this.getStates("/esp/temp", [], this.which_esps[j]);
       }
     },
     getStates(path_on_node, serie, wh) {
@@ -106,7 +118,7 @@ export default {
 
     async switchState(wh) {
       var url = this.node_url + "/esp/led";
-      var message = "on"
+      var message = "on";
       var header = new Headers();
       header.append("Content-Type", "application/json");
       await fetch(url, {
@@ -119,7 +131,7 @@ export default {
       });
     },
 
-    async addFlotte(wh){
+    async addFlotte(wh) {
       this.which_esps.append(wh);
       var url = this.node_url + "/flotte";
       var header = new Headers();
